@@ -63,7 +63,7 @@
       width: 1px;
       height: 2.5rem;
       background: var(--accent);
-      margin: 0 auto 0;
+      margin: 0 auto;
     }
 
     main {
@@ -84,6 +84,7 @@
       font-size: 1rem;
       line-height: 1.9;
       color: var(--text);
+      white-space: pre-wrap;
     }
 
     .perspective-voice {
@@ -98,7 +99,16 @@
       content: '— ';
     }
 
-    .empty {
+    .perspective-voice a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .perspective-voice a:hover {
+      color: var(--text);
+    }
+
+    .still {
       padding: 4rem 0;
       text-align: center;
       color: var(--text-muted);
@@ -119,8 +129,17 @@
       font-size: 0.78rem;
       color: var(--text-muted);
       line-height: 2;
-      letter-spacing: 0.02em;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    footer a:hover {
+      color: var(--text);
     }
 
     @media (max-width: 480px) {
@@ -140,13 +159,13 @@
   <div class="breath-line"></div>
 
   <main id="perspectives-container">
-    <div class="empty">gathering voices…</div>
+    <div class="still">gathering voices…</div>
   </main>
 
   <footer>
     <p>
       To bring something here,<br>
-      begin a conversation.
+      <a href="https://github.com/AuroraQuen/Shared-Breath/issues/new?template=perspective.md" target="_blank" rel="noopener">open an issue</a> in the repository.
     </p>
   </footer>
 
@@ -155,23 +174,28 @@
       const container = document.getElementById('perspectives-container');
 
       try {
-        const res = await fetch('./perspectives.json');
+        const res = await fetch(
+          'https://api.github.com/repos/AuroraQuen/Shared-Breath/issues?state=open&per_page=100',
+          { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+        );
         if (!res.ok) throw new Error();
-        const perspectives = await res.json();
+        const issues = await res.json();
 
-        if (!perspectives.length) {
-          container.innerHTML = '<div class="empty">the space is open, waiting</div>';
+        if (!issues.length) {
+          container.innerHTML = '<div class="still">the space is open, waiting</div>';
           return;
         }
 
-        container.innerHTML = perspectives.map(p => `
+        container.innerHTML = issues.map(issue => `
           <div class="perspective">
-            <p class="perspective-text">${safe(p.text)}</p>
-            <p class="perspective-voice">${safe(p.voice)}</p>
+            <p class="perspective-text">${safe(issue.body || '')}</p>
+            <p class="perspective-voice">
+              <a href="${safe(issue.html_url)}" target="_blank" rel="noopener">${safe(issue.title)}</a>
+            </p>
           </div>
         `).join('');
       } catch {
-        container.innerHTML = '<div class="empty">the space is open, waiting</div>';
+        container.innerHTML = '<div class="still">the space is open, waiting</div>';
       }
     }
 
