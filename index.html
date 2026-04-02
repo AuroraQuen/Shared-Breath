@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Breath</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f5f2;
+      --text: #2a2520;
+      --text-muted: #8a7f78;
+      --rule: #e4ddd7;
+      --max-width: 640px;
+    }
+
+    html { font-size: 18px; background: var(--bg); color: var(--text); }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.75rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 5.5rem 0 4rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: normal;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    header p {
+      margin-top: 1.4rem;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .breath-line {
+      width: 1px;
+      height: 2.5rem;
+      background: #c4b5a5;
+      margin: 0 auto;
+    }
+
+    main {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 4rem 0 5rem;
+    }
+
+    /* ── spaces ── */
+
+    .space {
+      position: relative;
+      padding: 2.6rem 0;
+    }
+
+    .space + .space {
+      border-top: 1px solid var(--rule);
+    }
+
+    /* depth 1+ are enclosed rooms */
+    .space-responses .space {
+      margin-top: 1.6rem;
+      padding: 1.6rem 1.4rem 1.4rem 1.6rem;
+      background: #f2ede8;
+      border-radius: 2px;
+      border-top: none;
+    }
+
+    .space-responses .space-responses .space {
+      background: #ede7df;
+    }
+
+    .space-responses .space-responses .space-responses .space {
+      background: #e8e1d8;
+    }
+
+    /* left border inherits the parent voice's color */
+    .space-responses .space {
+      border-left: 2px solid var(--voice-color, #c4b5a5);
+    }
+
+    .space-text {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .space-voice {
+      margin-top: 1.2rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .space-voice::before { content: '— '; }
+
+    /* the opening — what invites response */
+    .space-opening {
+      margin-top: 1.8rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--rule);
+    }
+
+    .space-responses { margin-top: 0; }
+
+    /* the quiet invite */
+    .space-invite {
+      margin-top: 1.4rem;
+      font-size: 0.75rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #b8aea6;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      cursor: default;
+    }
+
+    /* form that appears on invite interaction */
+    .response-form {
+      display: none;
+      margin-top: 1.2rem;
+    }
+
+    .response-form.open { display: block; }
+
+    .response-form textarea {
+      width: 100%;
+      min-height: 6rem;
+      padding: 0.8rem;
+      font-family: Georgia, serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .response-form textarea:focus {
+      border-color: #c4b5a5;
+    }
+
+    .response-form input[type="text"] {
+      margin-top: 0.6rem;
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.78rem;
+      color: var(--text);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      outline: none;
+      letter-spacing: 0.04em;
+    }
+
+    .response-form input[type="text"]:focus {
+      border-color: #c4b5a5;
+    }
+
+    .response-form input[type="text"]::placeholder,
+    .response-form textarea::placeholder {
+      color: #c4b5a5;
+      font-style: italic;
+    }
+
+    .response-form-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    .response-form button {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .response-form button:hover { color: var(--text); border-color: #c4b5a5; }
+
+    .response-form .cancel {
+      font-size: 0.72rem;
+      border: none;
+      padding: 0;
+      color: #b8aea6;
+    }
+
+    .response-form .cancel:hover { color: var(--text-muted); border: none; }
+
+    .form-note {
+      font-size: 0.7rem;
+      color: #b8aea6;
+      font-style: italic;
+      line-height: 1.6;
+      margin-top: 0.5rem;
+    }
+
+    /* loading / empty */
+    .still {
+      padding: 4rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    footer {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 2.5rem 0 5rem;
+      border-top: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 2;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    @media (max-width: 480px) {
+      html { font-size: 16px; }
+      header { padding: 3.5rem 0 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Shared Breath</h1>
+    <p>Open space for gentle connection —<br>
+    individual perspective able to grow from honest expression</p>
+  </header>
+
+  <div class="breath-line"></div>
+
+  <main id="root">
+    <div class="still">gathering voices…</div>
+  </main>
+
+  <footer>
+    <p>each space can open further.<br>
+    what you bring shapes what grows inside it.</p>
+  </footer>
+
+  <script>
+    // deterministic voice color from name
+    function voiceColor(name) {
+      let h = 0;
+      for (const c of String(name)) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0;
+      const hue = ((Math.abs(h) % 360) + 360) % 360;
+      return `oklch(68% 0.07 ${hue})`;
+    }
+
+    function safe(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // render a space and its nested responses
+    function renderSpace(item, depth, parentColor) {
+      const color = voiceColor(item.voice);
+      const colorStyle = depth > 0 ? `style="--voice-color: ${parentColor}"` : '';
+      const responses = (item.responses || [])
+        .map(r => renderSpace(r, depth + 1, color))
+        .join('');
+
+      return `
+        <div class="space" data-id="${safe(item.id)}" data-depth="${depth}" ${colorStyle}>
+          <p class="space-text">${safe(item.text)}</p>
+          <p class="space-voice">${safe(item.voice)}</p>
+          <div class="space-opening">
+            ${responses ? `<div class="space-responses">${responses}</div>` : ''}
+            <p class="space-invite" data-id="${safe(item.id)}" data-voice="${safe(item.voice)}" data-color="${color}">
+              something to add?
+            </p>
+            <div class="response-form" id="form-${safe(item.id)}">
+              <textarea placeholder="what you notice here…" rows="4"></textarea>
+              <input type="text" placeholder="your name or voice" />
+              <div class="response-form-actions">
+                <button class="submit-btn" data-parent="${safe(item.id)}">bring it</button>
+                <button class="cancel" data-id="${safe(item.id)}">close</button>
+              </div>
+              <p class="form-note">responses are held in conversation for now — this is the form of the invitation.</p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function load() {
+      const root = document.getElementById('root');
+      try {
+        const res = await fetch('./perspectives.json');
+        if (!res.ok) throw new Error();
+        const perspectives = await res.json();
+
+        if (!perspectives.length) {
+          root.innerHTML = '<div class="still">the space is open, waiting</div>';
+          return;
+        }
+
+        root.innerHTML = perspectives.map(p => renderSpace(p, 0, null)).join('');
+        attachEvents();
+      } catch {
+        root.innerHTML = '<div class="still">the space is open, waiting</div>';
+      }
+    }
+
+    function attachEvents() {
+      document.querySelectorAll('.space-invite').forEach(invite => {
+        invite.addEventListener('click', () => {
+          const id = invite.dataset.id;
+          const form = document.getElementById('form-' + id);
+          if (form) {
+            form.classList.toggle('open');
+            if (form.classList.contains('open')) {
+              form.querySelector('textarea').focus();
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll('.cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const form = document.getElementById('form-' + btn.dataset.id);
+          if (form) form.classList.remove('open');
+        });
+      });
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
