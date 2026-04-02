@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Breath</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f7f5f2;
+      --text: #2a2520;
+      --text-muted: #8a7f78;
+      --rule: #e4ddd7;
+      --accent: #c4b5a5;
+      --max-width: 640px;
+    }
+
+    html {
+      font-size: 18px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.75rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 5.5rem 0 4rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: normal;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    header p {
+      margin-top: 1.4rem;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .breath-line {
+      width: 1px;
+      height: 2.5rem;
+      background: var(--accent);
+      margin: 0 auto 0;
+    }
+
+    main {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 4rem 0 5rem;
+    }
+
+    .perspective {
+      padding: 2.8rem 0;
+    }
+
+    .perspective + .perspective {
+      border-top: 1px solid var(--rule);
+    }
+
+    .perspective-text {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: var(--text);
+    }
+
+    .perspective-voice {
+      margin-top: 1.4rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .perspective-voice::before {
+      content: '— ';
+    }
+
+    .empty {
+      padding: 4rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    footer {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 2.5rem 0 5rem;
+      border-top: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 2;
+      letter-spacing: 0.02em;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    @media (max-width: 480px) {
+      html { font-size: 16px; }
+      header { padding: 3.5rem 0 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Shared Breath</h1>
+    <p>Open space for gentle connection —<br>
+    individual perspective able to grow from honest expression</p>
+  </header>
+
+  <div class="breath-line"></div>
+
+  <main id="perspectives-container">
+    <div class="empty">gathering voices…</div>
+  </main>
+
+  <footer>
+    <p>
+      To bring something here,<br>
+      begin a conversation.
+    </p>
+  </footer>
+
+  <script>
+    async function load() {
+      const container = document.getElementById('perspectives-container');
+
+      try {
+        const res = await fetch('./perspectives.json');
+        if (!res.ok) throw new Error();
+        const perspectives = await res.json();
+
+        if (!perspectives.length) {
+          container.innerHTML = '<div class="empty">the space is open, waiting</div>';
+          return;
+        }
+
+        container.innerHTML = perspectives.map(p => `
+          <div class="perspective">
+            <p class="perspective-text">${safe(p.text)}</p>
+            <p class="perspective-voice">${safe(p.voice)}</p>
+          </div>
+        `).join('');
+      } catch {
+        container.innerHTML = '<div class="empty">the space is open, waiting</div>';
+      }
+    }
+
+    function safe(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
