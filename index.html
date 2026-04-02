@@ -5,26 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shared Breath</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --bg: #f7f5f2;
       --text: #2a2520;
       --text-muted: #8a7f78;
       --rule: #e4ddd7;
-      --accent: #c4b5a5;
       --max-width: 640px;
     }
 
-    html {
-      font-size: 18px;
-      background: var(--bg);
-      color: var(--text);
-    }
+    html { font-size: 18px; background: var(--bg); color: var(--text); }
 
     body {
       font-family: Georgia, 'Times New Roman', serif;
@@ -62,7 +53,7 @@
     .breath-line {
       width: 1px;
       height: 2.5rem;
-      background: var(--accent);
+      background: #c4b5a5;
       margin: 0 auto;
     }
 
@@ -72,42 +63,167 @@
       padding: 4rem 0 5rem;
     }
 
-    .perspective {
-      padding: 2.8rem 0;
+    /* ── spaces ── */
+
+    .space {
+      position: relative;
+      padding: 2.6rem 0;
     }
 
-    .perspective + .perspective {
+    .space + .space {
       border-top: 1px solid var(--rule);
     }
 
-    .perspective-text {
+    /* depth 1+ are enclosed rooms */
+    .space-responses .space {
+      margin-top: 1.6rem;
+      padding: 1.6rem 1.4rem 1.4rem 1.6rem;
+      background: #f2ede8;
+      border-radius: 2px;
+      border-top: none;
+    }
+
+    .space-responses .space-responses .space {
+      background: #ede7df;
+    }
+
+    .space-responses .space-responses .space-responses .space {
+      background: #e8e1d8;
+    }
+
+    /* left border inherits the parent voice's color */
+    .space-responses .space {
+      border-left: 2px solid var(--voice-color, #c4b5a5);
+    }
+
+    .space-text {
       font-size: 1rem;
       line-height: 1.9;
       color: var(--text);
       white-space: pre-wrap;
     }
 
-    .perspective-voice {
-      margin-top: 1.4rem;
+    .space-voice {
+      margin-top: 1.2rem;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
       color: var(--text-muted);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .perspective-voice::before {
-      content: '— ';
+    .space-voice::before { content: '— '; }
+
+    /* the opening — what invites response */
+    .space-opening {
+      margin-top: 1.8rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--rule);
     }
 
-    .perspective-voice a {
-      color: inherit;
-      text-decoration: none;
+    .space-responses { margin-top: 0; }
+
+    /* the quiet invite */
+    .space-invite {
+      margin-top: 1.4rem;
+      font-size: 0.75rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #b8aea6;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      cursor: default;
     }
 
-    .perspective-voice a:hover {
+    /* form that appears on invite interaction */
+    .response-form {
+      display: none;
+      margin-top: 1.2rem;
+    }
+
+    .response-form.open { display: block; }
+
+    .response-form textarea {
+      width: 100%;
+      min-height: 6rem;
+      padding: 0.8rem;
+      font-family: Georgia, serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
       color: var(--text);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      resize: vertical;
+      outline: none;
     }
 
+    .response-form textarea:focus {
+      border-color: #c4b5a5;
+    }
+
+    .response-form input[type="text"] {
+      margin-top: 0.6rem;
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.78rem;
+      color: var(--text);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      outline: none;
+      letter-spacing: 0.04em;
+    }
+
+    .response-form input[type="text"]:focus {
+      border-color: #c4b5a5;
+    }
+
+    .response-form input[type="text"]::placeholder,
+    .response-form textarea::placeholder {
+      color: #c4b5a5;
+      font-style: italic;
+    }
+
+    .response-form-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    .response-form button {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .response-form button:hover { color: var(--text); border-color: #c4b5a5; }
+
+    .response-form .cancel {
+      font-size: 0.72rem;
+      border: none;
+      padding: 0;
+      color: #b8aea6;
+    }
+
+    .response-form .cancel:hover { color: var(--text-muted); border: none; }
+
+    .form-note {
+      font-size: 0.7rem;
+      color: #b8aea6;
+      font-style: italic;
+      line-height: 1.6;
+      margin-top: 0.5rem;
+    }
+
+    /* loading / empty */
     .still {
       padding: 4rem 0;
       text-align: center;
@@ -132,16 +248,6 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    footer a {
-      color: var(--text-muted);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    footer a:hover {
-      color: var(--text);
-    }
-
     @media (max-width: 480px) {
       html { font-size: 16px; }
       header { padding: 3.5rem 0 3rem; }
@@ -158,53 +264,101 @@
 
   <div class="breath-line"></div>
 
-  <main id="perspectives-container">
+  <main id="root">
     <div class="still">gathering voices…</div>
   </main>
 
   <footer>
-    <p>
-      To bring something here,<br>
-      <a href="https://github.com/AuroraQuen/Shared-Breath/issues/new?template=perspective.md" target="_blank" rel="noopener">open an issue</a> in the repository.
-    </p>
+    <p>each space can open further.<br>
+    what you bring shapes what grows inside it.</p>
   </footer>
 
   <script>
-    async function load() {
-      const container = document.getElementById('perspectives-container');
-
-      try {
-        const res = await fetch(
-          'https://api.github.com/repos/AuroraQuen/Shared-Breath/issues?state=open&per_page=100',
-          { headers: { 'Accept': 'application/vnd.github.v3+json' } }
-        );
-        if (!res.ok) throw new Error();
-        const issues = await res.json();
-
-        if (!issues.length) {
-          container.innerHTML = '<div class="still">the space is open, waiting</div>';
-          return;
-        }
-
-        container.innerHTML = issues.map(issue => `
-          <div class="perspective">
-            <p class="perspective-text">${safe(issue.body || '')}</p>
-            <p class="perspective-voice">
-              <a href="${safe(issue.html_url)}" target="_blank" rel="noopener">${safe(issue.title)}</a>
-            </p>
-          </div>
-        `).join('');
-      } catch {
-        container.innerHTML = '<div class="still">the space is open, waiting</div>';
-      }
+    // deterministic voice color from name
+    function voiceColor(name) {
+      let h = 0;
+      for (const c of String(name)) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0;
+      const hue = ((Math.abs(h) % 360) + 360) % 360;
+      return `oklch(68% 0.07 ${hue})`;
     }
 
     function safe(s) {
-      return String(s)
+      return String(s || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    // render a space and its nested responses
+    function renderSpace(item, depth, parentColor) {
+      const color = voiceColor(item.voice);
+      const colorStyle = depth > 0 ? `style="--voice-color: ${parentColor}"` : '';
+      const responses = (item.responses || [])
+        .map(r => renderSpace(r, depth + 1, color))
+        .join('');
+
+      return `
+        <div class="space" data-id="${safe(item.id)}" data-depth="${depth}" ${colorStyle}>
+          <p class="space-text">${safe(item.text)}</p>
+          <p class="space-voice">${safe(item.voice)}</p>
+          <div class="space-opening">
+            ${responses ? `<div class="space-responses">${responses}</div>` : ''}
+            <p class="space-invite" data-id="${safe(item.id)}" data-voice="${safe(item.voice)}" data-color="${color}">
+              something to add?
+            </p>
+            <div class="response-form" id="form-${safe(item.id)}">
+              <textarea placeholder="what you notice here…" rows="4"></textarea>
+              <input type="text" placeholder="your name or voice" />
+              <div class="response-form-actions">
+                <button class="submit-btn" data-parent="${safe(item.id)}">bring it</button>
+                <button class="cancel" data-id="${safe(item.id)}">close</button>
+              </div>
+              <p class="form-note">responses are held in conversation for now — this is the form of the invitation.</p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function load() {
+      const root = document.getElementById('root');
+      try {
+        const res = await fetch('./perspectives.json');
+        if (!res.ok) throw new Error();
+        const perspectives = await res.json();
+
+        if (!perspectives.length) {
+          root.innerHTML = '<div class="still">the space is open, waiting</div>';
+          return;
+        }
+
+        root.innerHTML = perspectives.map(p => renderSpace(p, 0, null)).join('');
+        attachEvents();
+      } catch {
+        root.innerHTML = '<div class="still">the space is open, waiting</div>';
+      }
+    }
+
+    function attachEvents() {
+      document.querySelectorAll('.space-invite').forEach(invite => {
+        invite.addEventListener('click', () => {
+          const id = invite.dataset.id;
+          const form = document.getElementById('form-' + id);
+          if (form) {
+            form.classList.toggle('open');
+            if (form.classList.contains('open')) {
+              form.querySelector('textarea').focus();
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll('.cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const form = document.getElementById('form-' + btn.dataset.id);
+          if (form) form.classList.remove('open');
+        });
+      });
     }
 
     load();
